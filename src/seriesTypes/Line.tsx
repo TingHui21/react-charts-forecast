@@ -38,6 +38,26 @@ export default function Line<TDatum>({
 
         let areaPath: null | string = null
 
+        // Forecast area generation
+        if (secondaryAxis.elementType === 'forecast') {
+          const _x = (datum: Datum<TDatum>) => getPrimary(datum, primaryAxis)
+          const _yLower = (datum: Datum<TDatum>) =>
+            clampPxToAxis(datum.secondaryValueLower, secondaryAxis)
+          const _yUpper = (datum: Datum<TDatum>) =>
+            clampPxToAxis(datum.secondaryValueUpper, secondaryAxis)
+          const forecastAreaFn = area<Datum<TDatum>>()
+            .x(_x)
+            .y0(_yLower)
+            .y1(_yUpper)
+            .curve(curve);
+
+          forecastAreaFn.defined(datum =>
+            [_x(datum), _yLower(datum), _yUpper(datum)].every(isDefined)
+          )
+
+          areaPath = forecastAreaFn(series.datums)
+        }
+
         if (secondaryAxis.elementType === 'area') {
           const _x = (datum: Datum<TDatum>) => getPrimary(datum, primaryAxis)
           const _y1 = (datum: Datum<TDatum>) =>
